@@ -61,12 +61,20 @@ const generateId = () => {
   return Math.random() * 9999
 }
 
+const doesNameExist = (name) => {
+  return persons.find(p => p.name === name)
+}
+
 app.post('/api/persons', (request, response) => {
   const body = request.body
 
   if (!body.name && !body.number) {
     return response.status(400).json({
       error: 'Name or number missing'
+    })
+  } else if (doesNameExist(body.name)) {
+    return response.status(400).json({
+      error: 'Name is already added to phonebook'
     })
   }
 
