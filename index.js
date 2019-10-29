@@ -2,8 +2,11 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
+const cors = require('cors')
 
 app.use(bodyParser.json())
+app.use(cors())
+app.use(express.static('build'))
 
 morgan.token('person', (req, res) => {
   const body = req.body
@@ -13,7 +16,7 @@ morgan.token('person', (req, res) => {
   return JSON.stringify({ name: body.name, number: body.number })
 })
 
-const logger = morgan( (tokens, req, res) => {
+const logger = morgan((tokens, req, res) => {
   const body = req.body
   const log = [
     tokens.method(req, res),
@@ -28,7 +31,7 @@ const logger = morgan( (tokens, req, res) => {
   }
 
   const personObject = JSON.stringify({ name: body.name, number: body.number })
-  
+
   return log.concat(personObject).join(' ')
 })
 
