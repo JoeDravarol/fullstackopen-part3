@@ -4,7 +4,35 @@ const bodyParser = require('body-parser')
 const morgan = require('morgan')
 
 app.use(bodyParser.json())
-app.use(morgan('tiny'))
+
+morgan.token('person', (req, res) => {
+  const body = req.body
+  if (!body.name && !body.number) {
+    return null
+  }
+  return JSON.stringify({ name: body.name, number: body.number })
+})
+
+const logger = morgan( (tokens, req, res) => {
+  const body = req.body
+  const log = [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms'
+  ]
+
+  if (!body.name && !body.number) {
+    return log.join(' ')
+  }
+
+  const personObject = JSON.stringify({ name: body.name, number: body.number })
+  
+  return log.concat(personObject).join(' ')
+})
+
+app.use(logger)
 
 let persons = [
   {
@@ -86,9 +114,8 @@ app.post('/api/persons', (request, response) => {
     id: generateId()
   }
 
-  console.log(persons)
   persons = persons.concat(person)
-  console.log(persons)
+
   response.json(person)
 })
 
